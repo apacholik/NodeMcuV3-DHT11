@@ -1,0 +1,41 @@
+#include "FirebaseESP8266.h"
+
+#define FIREBASE_HOST "YourHost.firebaseio.com" 
+#define FIREBASE_AUTH "You author" 
+
+FirebaseData firebaseData;
+
+bool pushToBase(String JSONdata) {
+  String path = String("your/path/in/db");
+  
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  Firebase.reconnectWiFi(true);
+
+  //Set database read timeout to 1 minute (max 15 minutes)
+  Firebase.setReadTimeout(firebaseData, 1000 * 60);
+  //tiny, small, medium, large and unlimited.
+  //Size and its write timeout e.g. tiny (1s), small (10s), medium (30s) and large (60s).
+  Firebase.setwriteSizeLimit(firebaseData, "tiny");
+  
+  Serial.println("------------------------------------");
+    if (Firebase.pushJSON(firebaseData, path, JSONdata))
+    {
+      Serial.println("PASSED");
+      Serial.println("PATH: " + firebaseData.dataPath());
+      Serial.print("PUSH NAME: ");
+      Serial.println(firebaseData.pushName());
+      Serial.println("ETag: " + firebaseData.ETag());
+      Serial.println("------------------------------------");
+      Serial.println();
+      return true;
+    }
+    else
+    {
+      Serial.println("FAILED");
+      Serial.println("REASON: " + firebaseData.errorReason());
+      Serial.println("------------------------------------");
+      Serial.println();
+      return false;
+    }
+  Serial.println("------------------------------------");
+  }
